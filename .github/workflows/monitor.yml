@@ -1,0 +1,38 @@
+name: YC after-party monitor
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # relance la boucle ~toutes les 10 min (GitHub: best-effort)
+  workflow_dispatch: {}       # bouton "Run workflow" pour tester à la main
+
+permissions:
+  contents: write             # pour committer l'état (ci-state/) entre deux passages
+
+concurrency:
+  group: yc-monitor
+  cancel-in-progress: false   # ne jamais lancer deux boucles en parallèle
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Boucle de surveillance (~2 min)
+        env:
+          YC_COOKIE: ${{ secrets.YC_COOKIE }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          git config user.name  "yc-monitor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          # 6 vérifs espacées de 2 min (~10 min) ; le cron relance ensuite une nouvelle boucle.
+          for i in $(seq 1 6); do
+            bash check.sh || true
+            if [ -n "$(git status --porcelain ci-state)" ]; then
+              git add ci-state
+              git commit -m "update state [skip ci]" || true
+              git pull --rebase --autostash 2>/dev/null || true
+              git push || true
+            fi
+            [ "$i" -lt 6 ] && sleep 120
+          done

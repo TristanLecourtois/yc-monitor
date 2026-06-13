@@ -1,0 +1,20 @@
+# NE JAMAIS committer le cookie de session (secret -> stocké dans GitHub Secrets)
+cookies.txt
+
+# Logs locaux
+*.log
+launchd.out.log
+launchd.err.log
+
+# État du monitoring LOCAL (Mac/iMessage) — distinct de l'état cloud ci-state/
+/state/
+
+# Scripts du monitoring LOCAL (Mac/iMessage) — gardés sur ta machine, hors du dépôt public
+# (notify.sh contient ton email -> on ne le publie pas)
+monitor.sh
+notify.sh
+
+# Divers
+__pycache__/
+*.pyc
+.DS_Store
