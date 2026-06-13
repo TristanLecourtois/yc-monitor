@@ -34,5 +34,5 @@ jobs:
               git pull --rebase --autostash 2>/dev/null || true
               git push || true
             fi
-            [ "$i" -lt 6 ] && sleep 120
+            if [ "$i" -lt 6 ]; then sleep 120; fi
           done
